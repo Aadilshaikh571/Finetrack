@@ -18,6 +18,17 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/Finetrack
+
+            echo "Pulling latest code..."
             git pull origin main
+
+            echo "Installing dependencies..."
             npm install
-            pm2 restart all
+
+            echo "Building project..."
+            npm run build
+
+            echo "Restarting app..."
+            pm2 restart all || pm2 start npm --name "finetrack" -- start
+
+            echo "Deployment finished!"
