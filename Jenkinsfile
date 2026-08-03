@@ -15,12 +15,16 @@ pipeline {
         }
 
         stage('Load Environment Variables') {
-            steps {
-                withCredentials([file(credentialsId: 'finetrack-env', variable: 'ENV_FILE')]) {
-                    sh 'cp $ENV_FILE .env'
-                }
-            }
+    steps {
+        withCredentials([file(credentialsId: 'finetrack-env', variable: 'ENV_FILE')]) {
+            sh '''
+                rm -f .env
+                cp "$ENV_FILE" .env
+                chmod 600 .env
+            '''
         }
+    }
+}
 
         stage('Build Docker Image') {
             steps {
