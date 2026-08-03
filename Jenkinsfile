@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'docker' }
+    agent1 { label 'docker' }
 
     environment {
         IMAGE_NAME = "prince0001/finetrack"
