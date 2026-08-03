@@ -1,5 +1,5 @@
 pipeline {
-    agent1 { label 'docker' }
+    agent { label 'agent1' }
 
     environment {
         IMAGE_NAME = "prince0001/finetrack"
@@ -8,28 +8,23 @@ pipeline {
 
     stages {
 
-        stage('Checkout Source') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Copy Environment File') {
+        stage('Load Environment Variables') {
             steps {
                 withCredentials([file(credentialsId: 'finetrack-env', variable: 'ENV_FILE')]) {
-                    sh '''
-                    cp $ENV_FILE .env
-                    ls -la
-                    '''
+                    sh 'cp $ENV_FILE .env'
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                docker build -t $IMAGE_NAME:latest .
-                '''
+                sh 'docker build -t $IMAGE_NAME:latest .'
             }
         }
 
@@ -40,32 +35,28 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    '''
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                 }
             }
         }
 
-        stage('Push Image') {
+        stage('Push Docker Image') {
             steps {
-                sh '''
-                docker push $IMAGE_NAME:latest
-                '''
+                sh 'docker push $IMAGE_NAME:latest'
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy') {
             steps {
                 sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
 
-                docker run -d \
-                  --name $CONTAINER_NAME \
-                  -p 80:80 \
-                  --restart unless-stopped \
-                  $IMAGE_NAME:latest
+                    docker run -d \
+                      --name $CONTAINER_NAME \
+                      -p 80:80 \
+                      --restart unless-stopped \
+                      $IMAGE_NAME:latest
                 '''
             }
         }
@@ -77,11 +68,11 @@ pipeline {
         }
 
         success {
-            echo 'Finetrack deployed successfully!'
+            echo 'Deployment Successful!'
         }
 
         failure {
-            echo 'Deployment failed.'
+            echo 'Deployment Failed!'
         }
     }
 }
