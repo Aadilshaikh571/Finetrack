@@ -2,7 +2,7 @@ pipeline {
     agent { label 'agent1' }
 
     environment {
-        IMAGE_NAME = "prince0001/finetrack"
+        IMAGE_NAME = "prince0111/finetrack"
         CONTAINER_NAME = "finetrack"
     }
 
